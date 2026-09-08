@@ -1,0 +1,60 @@
+#---------------------------
+# Fluid 主题覆盖配置
+# 官方指南: https://hexo.fluid-dev.com/docs/guide/
+# 此文件会覆盖 node_modules/hexo-theme-fluid/_config.yml 中的同名配置
+#---------------------------
+
+# 浏览器标签图标，可替换为自己的图片放到 source/img/ 下
+favicon: /img/favicon.png
+
+navbar:
+  blog_title: "我的技术博客"
+  menu:
+    - { key: "home", link: "/", icon: "iconfont icon-home-fill" }
+    - { key: "archive", link: "/archives/", icon: "iconfont icon-archive-fill" }
+    - { key: "category", link: "/categories/", icon: "iconfont icon-category-fill" }
+    - { key: "tag", link: "/tags/", icon: "iconfont icon-tags-fill" }
+    - { key: "about", link: "/about/", icon: "iconfont icon-user-fill" }
+
+index:
+  # 首页头图，可替换为 source/img/ 下的图片
+  banner_img: /img/default.png
+  banner_img_height: 80
+  slogan:
+    enable: true
+
+post:
+  # 文章页头图高度调低，更聚焦内容（技术文档风）
+  banner_img_height: 50
+  meta:
+    wordcount:
+      enable: true
+    min2read:
+      enable: true
+  # 显示文章更新时间
+  updated:
+    enable: true
+  # 侧边栏目录（TOC），技术文章必备
+  toc:
+    enable: true
+    placement: right
+    collapseDepth: 2
+
+code:
+  copy_btn: true
+  language:
+    enable: true
+  highlight:
+    enable: true
+    line_number: true
+    lib: "highlightjs"
+    highlightjs:
+      style: "github gist"
+      style_dark: "dark"
+
+footer:
+  content: '
+    <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a>
+    <i class="iconfont icon-love"></i>
+    <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>
+  '
