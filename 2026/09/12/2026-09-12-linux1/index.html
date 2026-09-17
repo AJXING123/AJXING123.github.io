@@ -1,0 +1,1054 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/favicon.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="AJXING">
+  <meta name="keywords" content="技术,博客,编程">
+  
+    <meta name="description" content="系统掌握Linux文件系统树形结构与路径规则，目录浏览、文件增删改移、内容查看全命令精讲，附分步实操练习与ROS工作空间综合实战项目，适合开发新人收藏。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux 文件系统与基础命令学习手册">
+<meta property="og:url" content="https://ajxing123.github.io/2026/09/12/2026-09-12-linux1/index.html">
+<meta property="og:site_name" content="每天戒烟8小时">
+<meta property="og:description" content="系统掌握Linux文件系统树形结构与路径规则，目录浏览、文件增删改移、内容查看全命令精讲，附分步实操练习与ROS工作空间综合实战项目，适合开发新人收藏。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-09-12T02:00:00.000Z">
+<meta property="article:modified_time" content="2026-09-17T02:55:07.263Z">
+<meta property="article:author" content="AJXING">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="ROS">
+<meta property="article:tag" content="入门教程">
+<meta property="article:tag" content="命令行">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>Linux 文件系统与基础命令学习手册 - 每天戒烟8小时</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"ajxing123.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":2},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.2"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 50vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>我的技术博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Linux 文件系统与基础命令学习手册"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-09-12 10:00" pubdate>
+          2026年9月12日 上午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          3.9k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          33 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Linux 文件系统与基础命令学习手册</h1>
+            
+              <p id="updated-time" class="note note-info" style="">
+                
+                  
+                    本文最后更新于 2026年9月17日 上午
+                  
+                
+              </p>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="Linux-文件系统与基础命令学习手册"><a href="#Linux-文件系统与基础命令学习手册" class="headerlink" title="Linux 文件系统与基础命令学习手册"></a>Linux 文件系统与基础命令学习手册</h1><h2 id="学习目标"><a href="#学习目标" class="headerlink" title="学习目标"></a>学习目标</h2><p>掌握Linux文件系统树形结构与路径规则，熟练使用目录浏览、文件增删改移、内容查看类基础命令，能够独立完成日常文件操作与简单目录运维。</p>
+<h2 id="一、核心知识体系"><a href="#一、核心知识体系" class="headerlink" title="一、核心知识体系"></a>一、核心知识体系</h2><h3 id="1-1-文件系统结构"><a href="#1-1-文件系统结构" class="headerlink" title="1.1 文件系统结构"></a>1.1 文件系统结构</h3><p>Linux采用单根树形目录结构，所有文件从根目录 <code>/</code> 开始，没有Windows的C&#x2F;D盘符概念。</p>
+<table>
+<thead>
+<tr>
+<th align="left">目录</th>
+<th align="left">用途说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>/home</code></td>
+<td align="left">普通用户家目录，每个用户对应一个子目录，可自由读写</td>
+</tr>
+<tr>
+<td align="left"><code>/etc</code></td>
+<td align="left">系统与软件配置文件存放目录</td>
+</tr>
+<tr>
+<td align="left"><code>/opt</code></td>
+<td align="left">第三方软件安装目录（ROS默认安装路径）</td>
+</tr>
+<tr>
+<td align="left"><code>/var/log</code></td>
+<td align="left">系统日志存放目录</td>
+</tr>
+<tr>
+<td align="left"><code>/tmp</code></td>
+<td align="left">临时文件目录，系统重启后里面文件可能清空</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>核心原则</strong>：系统级目录谨慎修改，用户家目录（<code>~</code>）是你的自由操作区。</p>
+</blockquote>
+<h3 id="1-2-路径与特殊符号"><a href="#1-2-路径与特殊符号" class="headerlink" title="1.2 路径与特殊符号"></a>1.2 路径与特殊符号</h3><p>在Linux中路径分为<strong>绝对路径</strong>和<strong>相对路径</strong>。</p>
+<ul>
+<li><strong>绝对路径</strong>：以 <code>/</code> 开头，从根目录起始，位置固定，示例：<code>/home/user/file.txt</code></li>
+<li><strong>相对路径</strong>：以当前目录为起点，示例：<code>Documents/file.txt</code></li>
+</ul>
+<p>下面是开发中高频使用的路径特殊符号：</p>
+<table>
+<thead>
+<tr>
+<th align="left">符号</th>
+<th align="left">含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>.</code></td>
+<td align="left">当前目录</td>
+</tr>
+<tr>
+<td align="left"><code>..</code></td>
+<td align="left">上一级目录（父目录）</td>
+</tr>
+<tr>
+<td align="left"><code>~</code></td>
+<td align="left">当前用户的家目录</td>
+</tr>
+<tr>
+<td align="left"><code>-</code></td>
+<td align="left">上一次所在目录（仅 <code>cd</code> 命令支持）</td>
+</tr>
+</tbody></table>
+<h3 id="1-3-目录浏览命令"><a href="#1-3-目录浏览命令" class="headerlink" title="1.3 目录浏览命令"></a>1.3 目录浏览命令</h3><p>目录浏览是使用Linux最基础的操作，我们需要随时确认自己所在位置，查看文件夹内文件。</p>
+<table>
+<thead>
+<tr>
+<th align="left">命令</th>
+<th align="left">功能</th>
+<th align="left">常用用法&#x2F;参数</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>pwd</code></td>
+<td align="left">打印当前工作目录的绝对路径</td>
+<td align="left">直接执行，用于确认当前所在位置</td>
+</tr>
+<tr>
+<td align="left"><code>ls</code></td>
+<td align="left">列出目录内容</td>
+<td align="left"><code>-l</code>：长格式显示文件详情<br><code>-a</code>：显示隐藏文件<br><code>-h</code>：人性化展示文件大小<br>组合推荐：<code>ls -lah</code></td>
+</tr>
+<tr>
+<td align="left"><code>cd</code></td>
+<td align="left">切换工作目录</td>
+<td align="left"><code>cd ~</code>：返回家目录<br><code>cd ..</code>：返回上一级目录<br><code>cd -</code>：快速返回上一次所在目录<br><code>cd /</code>：进入根目录</td>
+</tr>
+</tbody></table>
+<h4 id="实操讲解"><a href="#实操讲解" class="headerlink" title="实操讲解"></a>实操讲解</h4><ol>
+<li>当你不确定自己当前在哪个文件夹时，直接输入<code>pwd</code>，终端就会输出当前目录完整路径。</li>
+<li><code>ls</code>用来查看文件夹里有哪些文件。单独<code>ls</code>只显示文件名；<code>ls -l</code>会展示权限、所有者、大小、修改时间；<code>ls -a</code>会把以<code>.</code>开头的隐藏文件一并展示。<code>ls -lah</code>是日常开发最常用组合。</li>
+<li><code>cd</code>用于跳转目录。<code>cd ~</code>一键回到自己家目录；<code>cd ..</code>向上跳一级；<code>cd -</code>可以在两个目录来回切换，适合来回对比两个文件夹。</li>
+</ol>
+<h3 id="1-4-文件与目录操作命令"><a href="#1-4-文件与目录操作命令" class="headerlink" title="1.4 文件与目录操作命令"></a>1.4 文件与目录操作命令</h3><p>创建、删除、复制、移动、重命名是日常开发最高频的文件操作，ROS开发中搭建功能包目录时会大量使用。</p>
+<table>
+<thead>
+<tr>
+<th align="left">命令</th>
+<th align="left">功能</th>
+<th align="left">关键注意事项</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>mkdir</code></td>
+<td align="left">创建目录</td>
+<td align="left"><code>-p</code> 参数用于递归创建多层嵌套目录</td>
+</tr>
+<tr>
+<td align="left"><code>touch</code></td>
+<td align="left">创建空文件 &#x2F; 更新文件时间戳</td>
+<td align="left">文件不存在则新建；文件已存在则刷新修改时间</td>
+</tr>
+<tr>
+<td align="left"><code>rm</code></td>
+<td align="left">删除文件&#x2F;目录</td>
+<td align="left">删除文件夹必须添加 <code>-r</code> 参数<br><code>-rf</code>：强制递归删除，<strong>执行前务必核对路径</strong></td>
+</tr>
+<tr>
+<td align="left"><code>cp</code></td>
+<td align="left">复制文件&#x2F;目录</td>
+<td align="left">复制整个目录必须加 <code>-r</code> 参数<br>语法：<code>cp 源路径 目标路径</code></td>
+</tr>
+<tr>
+<td align="left"><code>mv</code></td>
+<td align="left">移动文件 &#x2F; 重命名</td>
+<td align="left">同目录下执行mv等价于重命名<br>语法：<code>mv 源路径 目标路径</code></td>
+</tr>
+</tbody></table>
+<h4 id="实操讲解-1"><a href="#实操讲解-1" class="headerlink" title="实操讲解"></a>实操讲解</h4><ol>
+<li><code>mkdir</code>默认只能创建单层目录。如果需要一次性创建多级嵌套文件夹，必须加上<code>-p</code>参数，例如<code>mkdir -p project/src</code>。</li>
+<li><code>touch</code>核心两个作用：文件不存在就新建空白文本文件；文件已经存在，不会修改内容，只会更新文件最后的修改时间。</li>
+<li><code>rm</code>删除操作没有回收站，文件删除后很难恢复。删除文件夹时必须加<code>-r</code>；<code>rm -rf</code>强制删除，不会弹出确认提示，使用一定要谨慎。</li>
+<li><code>cp</code>复制文件直接使用；如果复制整个文件夹，必须加<code>-r</code>参数，否则会报错。</li>
+<li><code>mv</code>：如果源文件和目标文件在同一个文件夹，作用就是重命名；如果目标路径是别的目录，作用就是移动文件。</li>
+</ol>
+<h3 id="1-5-文件内容查看命令"><a href="#1-5-文件内容查看命令" class="headerlink" title="1.5 文件内容查看命令"></a>1.5 文件内容查看命令</h3><p>在开发中我们经常要读取配置文件、查看运行日志，不同场景选用不同查看命令。</p>
+<table>
+<thead>
+<tr>
+<th align="left">命令</th>
+<th align="left">适用场景</th>
+<th align="left">常用操作</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>cat</code></td>
+<td align="left">查看短小文本文件</td>
+<td align="left">一次性输出文件全部内容</td>
+</tr>
+<tr>
+<td align="left"><code>less</code></td>
+<td align="left">浏览长文件、大日志</td>
+<td align="left">空格向下翻页，<code>b</code>向上翻页，<code>/关键词</code>搜索，<code>q</code>退出</td>
+</tr>
+<tr>
+<td align="left"><code>head</code></td>
+<td align="left">查看文件开头内容</td>
+<td align="left">默认读取前10行；<code>-n N</code> 指定读取N行</td>
+</tr>
+<tr>
+<td align="left"><code>tail</code></td>
+<td align="left">查看文件末尾内容</td>
+<td align="left">默认读取最后10行；<code>-f</code> 实时跟踪新增内容，<code>Ctrl+C</code>停止</td>
+</tr>
+</tbody></table>
+<h4 id="实操讲解-2"><a href="#实操讲解-2" class="headerlink" title="实操讲解"></a>实操讲解</h4><ol>
+<li><code>cat</code>适合几十行以内的短文件，会一次性把全部内容打印到终端，文件太长会刷屏。</li>
+<li><code>less</code>是分页阅读器，打开长日志不会一次性加载全部内容。打开后空格向下翻页，b向上翻页，输入<code>/</code>加上关键词可以搜索文本，按<code>q</code>退出阅读器。</li>
+<li><code>head</code>用来查看文件开头，<code>head -n 5 app.log</code>代表只读取日志前5行。</li>
+<li><code>tail</code>查看文件末尾，查看日志最常用。<code>tail -f</code>会持续监听文件，一旦文件新增日志就实时打印，调试ROS节点输出日志时非常好用，<code>Ctrl+C</code>终止监听。</li>
+</ol>
+<h2 id="二、分步实操练习"><a href="#二、分步实操练习" class="headerlink" title="二、分步实操练习"></a>二、分步实操练习</h2><p>本章节为循序渐进的实操训练，跟着练习可以巩固上面所有基础命令。</p>
+<h3 id="阶段1：目录定位与浏览"><a href="#阶段1：目录定位与浏览" class="headerlink" title="阶段1：目录定位与浏览"></a>阶段1：目录定位与浏览</h3><p><strong>目标：建立路径位置感，熟练切换目录</strong><br>我们依次练习查看当前路径、浏览目录、文件夹跳转。</p>
+<ol>
+<li>使用<code>pwd</code>确认当前所在目录。</li>
+<li>使用<code>ls</code>、<code>ls -l</code>、<code>ls -lah</code>三种方式查看家目录内文件，对比输出结果差异。</li>
+<li>切换到系统临时目录<code>/tmp</code>，执行pwd验证当前位置，查看目录内容。</li>
+<li>执行<code>cd ..</code>回到上级根目录，用pwd确认。</li>
+<li>使用<code>cd ~</code>快速返回家目录，pwd验证。</li>
+<li>使用<code>cd -</code>在两个目录来回切换，感受快速跳转的便捷。</li>
+</ol>
+<h3 id="阶段2：创建与删除操作"><a href="#阶段2：创建与删除操作" class="headerlink" title="阶段2：创建与删除操作"></a>阶段2：创建与删除操作</h3><p><strong>目标：掌握目录和文件的新建、删除</strong></p>
+<ol>
+<li>回到家目录，创建<code>linux_practice</code>练习文件夹，进入这个目录，确认当前路径。</li>
+<li>使用<code>mkdir -p</code>一次性创建多层目录<code>project/src</code>和<code>project/logs</code>，使用<code>ls -R</code>查看完整目录树。</li>
+<li>创建空白文件<code>readme.txt</code>，同时在src文件夹下创建<code>main.py</code>、<code>utils.py</code>两个源码文件，查看src目录。</li>
+<li>删除练习：新建<code>test_del.txt</code>，查看文件，执行rm删除；再创建嵌套文件夹<code>test_dir/sub</code>，使用<code>rm -r</code>删除整个目录。</li>
+</ol>
+<h3 id="阶段3：复制与移动操作"><a href="#阶段3：复制与移动操作" class="headerlink" title="阶段3：复制与移动操作"></a>阶段3：复制与移动操作</h3><p><strong>目标：掌握文件复制、移动、重命名</strong></p>
+<ol>
+<li>复制readme.txt，生成备份文件readme_backup.txt，查看目录验证。</li>
+<li>复制整个project文件夹，命名为project_copy，<code>ls -R</code>查看复制后的完整目录。</li>
+<li>使用mv命令，将readme_backup.txt重命名为README_backup.txt。</li>
+<li>将重命名后的README_backup.txt移动到project目录内，查看project目录确认。</li>
+</ol>
+<h3 id="阶段4：文件内容查看"><a href="#阶段4：文件内容查看" class="headerlink" title="阶段4：文件内容查看"></a>阶段4：文件内容查看</h3><p><strong>目标：适配不同场景的文件查看需求</strong><br>我们先创建一份测试日志文件用于练习。</p>
+<ol>
+<li>使用cat查看readme.txt短文件。</li>
+<li>使用head读取日志前5行，tail读取日志末尾5行。</li>
+<li>使用less分页浏览日志文件，熟悉翻页、搜索、退出操作。</li>
+<li>使用<code>tail -f</code>实时跟踪日志新增内容，使用<code>Ctrl+C</code>结束监听。</li>
+</ol>
+<h2 id="三、综合实战项目：模拟ROS工作空间搭建"><a href="#三、综合实战项目：模拟ROS工作空间搭建" class="headerlink" title="三、综合实战项目：模拟ROS工作空间搭建"></a>三、综合实战项目：模拟ROS工作空间搭建</h2><h3 id="项目目标"><a href="#项目目标" class="headerlink" title="项目目标"></a>项目目标</h3><p>模拟ROS2开发场景，完成工作空间目录搭建、文件布置、备份、整理、日志监控全流程，覆盖前面全部基础命令。</p>
+<h3 id="最终目录结构"><a href="#最终目录结构" class="headerlink" title="最终目录结构"></a>最终目录结构</h3><p>~&#x2F;ros2_ws&#x2F;<br>├── src&#x2F;<br>│   ├── robot_chassis&#x2F;<br>│   ├── robot_vision&#x2F;<br>│   └── robot_control&#x2F;<br>├── logs&#x2F;<br>├── config&#x2F;<br>└── backup&#x2F;</p>
+<h3 id="操作步骤"><a href="#操作步骤" class="headerlink" title="操作步骤"></a>操作步骤</h3><h4 id="步骤1：创建目录结构"><a href="#步骤1：创建目录结构" class="headerlink" title="步骤1：创建目录结构"></a>步骤1：创建目录结构</h4><p>回到家目录，使用<code>mkdir -p</code>一次性创建ros2工作空间完整目录树，创建完成后使用<code>ls -R</code>查看完整目录，核对文件夹结构是否和预期一致。</p>
+<h4 id="步骤2：创建初始文件"><a href="#步骤2：创建初始文件" class="headerlink" title="步骤2：创建初始文件"></a>步骤2：创建初始文件</h4><p>进入ros2_ws的src源码目录，分别为robot_base、robot_vision、robot_control三个功能包创建<code>package.xml</code>和<code>CMakeLists.txt</code>配置文件。<br>然后在config文件夹创建参数配置文件params.yaml，logs文件夹创建runtime.log日志文件。</p>
+<h4 id="步骤3：写入测试数据"><a href="#步骤3：写入测试数据" class="headerlink" title="步骤3：写入测试数据"></a>步骤3：写入测试数据</h4><p>编辑params.yaml配置文件，写入机器人名称、最大速度等配置参数。<br>生成模拟节点运行日志，用来测试日志查看命令。</p>
+<h4 id="步骤4：文件备份与整理"><a href="#步骤4：文件备份与整理" class="headerlink" title="步骤4：文件备份与整理"></a>步骤4：文件备份与整理</h4><ol>
+<li>将src源码文件夹完整复制备份到backup目录下，作为项目备份。</li>
+<li>将params.yaml配置文件，复制分发到三个功能包目录。</li>
+<li>使用mv命令，把robot_base功能包重命名为robot_chassis。</li>
+</ol>
+<h4 id="步骤5：内容查看与监控"><a href="#步骤5：内容查看与监控" class="headerlink" title="步骤5：内容查看与监控"></a>步骤5：内容查看与监控</h4><ol>
+<li>使用cat查看params.yaml配置文件，核对写入的参数。</li>
+<li>head、tail查看日志文件首尾内容。</li>
+<li>less分页浏览完整运行日志。</li>
+<li>tail -f实时监控runtime.log，模拟ROS节点运行日志输出。</li>
+</ol>
+<h4 id="步骤6：清理与收尾"><a href="#步骤6：清理与收尾" class="headerlink" title="步骤6：清理与收尾"></a>步骤6：清理与收尾</h4><p>删除backup目录里旧的源码备份文件夹，删除robot_vision功能包里多余的params.yaml配置副本。最后执行ls -R查看整个ros2_ws完整目录，完成项目。</p>
+<h2 id="四、常见易错点与学习提示"><a href="#四、常见易错点与学习提示" class="headerlink" title="四、常见易错点与学习提示"></a>四、常见易错点与学习提示</h2><ol>
+<li><strong>路径大小写敏感</strong>：Linux系统下 <code>Documents</code> 和 <code>documents</code> 是两个完全不同的目录，输入命令时注意大小写拼写。</li>
+<li><strong>删除操作谨慎</strong>：<code>rm</code> 删除文件没有回收站，一旦删除很难恢复；执行 <code>rm -rf</code> 之前，先用ls确认目标路径。</li>
+<li><strong>目录操作参数</strong>：复制、删除文件夹的时候，必须带上 <code>-r</code> 参数，直接对目录执行cp或rm会报错。</li>
+<li><strong>空格路径处理</strong>：如果路径名称包含空格，要用双引号包裹，例如 <code>cd &quot;My Documents&quot;</code>。开发项目路径尽量避免空格。</li>
+<li><strong>学习技巧</strong>：不用死记硬背全部命令，多使用<code>Tab</code>键自动补全路径，结合实操练习加深记忆。</li>
+</ol>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>本篇手册覆盖Linux文件系统和文件操作全部基础能力，也是ROS开发的前置必备技能。熟练掌握这些基础命令，就可以独立完成ROS工作空间管理、配置文件维护、日志查看调试，为后续机器人开发打好基础。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E6%8A%80%E6%9C%AF/" class="category-chain-item">技术</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Linux/" class="print-no-link">#Linux</a>
+      
+        <a href="/tags/%E5%91%BD%E4%BB%A4%E8%A1%8C/" class="print-no-link">#命令行</a>
+      
+        <a href="/tags/%E5%85%A5%E9%97%A8%E6%95%99%E7%A8%8B/" class="print-no-link">#入门教程</a>
+      
+        <a href="/tags/ROS/" class="print-no-link">#ROS</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Linux 文件系统与基础命令学习手册</div>
+      <div>https://ajxing123.github.io/2026/09/12/2026-09-12-linux1/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>AJXING</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年9月12日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/09/10/2026-09-10-git-command-guide/" title="Git 指令实战大全：从入门到团队协作，一篇打通所有常用操作">
+                        <span class="hidden-mobile">Git 指令实战大全：从入门到团队协作，一篇打通所有常用操作</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
