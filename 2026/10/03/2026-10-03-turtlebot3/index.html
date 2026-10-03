@@ -1,0 +1,1115 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/favicon.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="AJXING">
+  <meta name="keywords" content="技术,博客,编程">
+  
+    <meta name="description" content="基于 Ubuntu 22.04 + ROS 2 Humble + Gazebo Classic 搭建 TurtleBot3 Burger 仿真导航系统，完整记录从 SLAM 建图、AMCL 定位、Nav2 路径规划到 Python Action Client 多点定点导航（P1→P2→P3→P4）的实现与踩坑排查全过程。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TurtleBot3 多点定点导航项目">
+<meta property="og:url" content="https://ajxing123.github.io/2026/10/03/2026-10-03-turtlebot3/index.html">
+<meta property="og:site_name" content="每天戒烟8小时">
+<meta property="og:description" content="基于 Ubuntu 22.04 + ROS 2 Humble + Gazebo Classic 搭建 TurtleBot3 Burger 仿真导航系统，完整记录从 SLAM 建图、AMCL 定位、Nav2 路径规划到 Python Action Client 多点定点导航（P1→P2→P3→P4）的实现与踩坑排查全过程。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-10-03T02:00:00.000Z">
+<meta property="article:modified_time" content="2026-10-03T00:52:39.030Z">
+<meta property="article:author" content="AJXING">
+<meta property="article:tag" content="AMCL">
+<meta property="article:tag" content="Gazebo">
+<meta property="article:tag" content="Nav2">
+<meta property="article:tag" content="ROS 2">
+<meta property="article:tag" content="SLAM">
+<meta property="article:tag" content="TurtleBot3">
+<meta property="article:tag" content="机器人导航">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>TurtleBot3 多点定点导航项目 - 每天戒烟8小时</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"ajxing123.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":2},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.2"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 50vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>我的技术博客</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="TurtleBot3 多点定点导航项目"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-10-03 10:00" pubdate>
+          2026年10月3日 上午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          6k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          51 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">TurtleBot3 多点定点导航项目</h1>
+            
+              <p id="updated-time" class="note note-info" style="">
+                
+                  
+                    本文最后更新于 2026年10月3日 早上
+                  
+                
+              </p>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="TurtleBot3-多点定点导航项目"><a href="#TurtleBot3-多点定点导航项目" class="headerlink" title="TurtleBot3 多点定点导航项目"></a>TurtleBot3 多点定点导航项目</h1><blockquote>
+<p>基于 Ubuntu 22.04 + ROS 2 Humble + Gazebo Classic 搭建 TurtleBot3<br>Burger 仿真导航系统，实现从建图、定位到多点定点导航，并通过 Python 与<br>Bash 脚本完成自动化。</p>
+</blockquote>
+<h2 id="一、项目介绍"><a href="#一、项目介绍" class="headerlink" title="一、项目介绍"></a>一、项目介绍</h2><p>本项目的目标是在 Gazebo Classic 中搭建 TurtleBot3 Burger<br>仿真环境，并基于 ROS 2 Humble 完成一套完整的移动机器人导航流程：</p>
+<ul>
+<li>在 Gazebo 中运行 TurtleBot3 Burger</li>
+<li>使用 LiDAR 进行环境感知</li>
+<li>使用 SLAM Toolbox 完成环境建图</li>
+<li>保存二维栅格地图</li>
+<li>使用 AMCL 在已知地图中进行定位</li>
+<li>使用 Nav2 完成路径规划与运动控制</li>
+<li>使用 Python Action Client 实现多目标点顺序导航</li>
+<li>使用 Bash 脚本将 Gazebo、Nav2、AMCL 和多点导航程序串联起来</li>
+</ul>
+<p>最终实现：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">P1 → P2 → P3 → P4<br></code></pre></td></tr></table></figure>
+
+<p>机器人能够在 Gazebo 中依次前往四个预先记录的目标点。</p>
+<blockquote>
+<p>当前项目重点是多点定点导航，不以复杂动态避障为目标。</p>
+</blockquote>
+<h2 id="二、项目最终效果"><a href="#二、项目最终效果" class="headerlink" title="二、项目最终效果"></a>二、项目最终效果</h2><p>完整工作流：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs text">start_nav.sh<br>    ↓<br>Gazebo<br>    ↓<br>TurtleBot3 Burger<br>    ↓<br>Nav2<br>    ↓<br>AMCL 初始化<br>    ↓<br>加载已保存地图<br>    ↓<br>multi_point_nav.py<br>    ↓<br>P1 → P2 → P3 → P4<br></code></pre></td></tr></table></figure>
+
+<p>项目已经实际验证了 P1 → P2 → P3 → P4 的连续导航。</p>
+<h2 id="三、项目架构"><a href="#三、项目架构" class="headerlink" title="三、项目架构"></a>三、项目架构</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><code class="hljs text">                    ┌──────────────────────┐<br>                    │      start_nav.sh    │<br>                    │     一键启动脚本      │<br>                    └──────────┬───────────┘<br>                               │<br>         ┌─────────────────────┴─────────────────────┐<br>         │                                           │<br>         ▼                                           ▼<br>┌─────────────────┐                         ┌─────────────────┐<br>│ Gazebo Classic  │                         │      Nav2       │<br>│  TurtleBot3     │                         │    导航框架      │<br>└────────┬────────┘                         └────────┬────────┘<br>         │                                           │<br>  ┌──────┼───────┐                       ┌───────────┼───────────┐<br>  │      │       │                       │           │           │<br>  ▼      ▼       ▼                       ▼           ▼           ▼<br>/scan  /odom     TF                    AMCL       Planner     Controller<br>  │      │       │                       │           │           │<br>  └──────┴───────┴───────────────────────┴───────────┴───────────┘<br>                               │<br>                               ▼<br>                      /navigate_to_pose<br>                               │<br>                               ▼<br>                    multi_point_nav.py<br>                               │<br>                    P1 → P2 → P3 → P4<br>                               │<br>                               ▼<br>                             /cmd_vel<br>                               │<br>                               ▼<br>                          TurtleBot3<br></code></pre></td></tr></table></figure>
+
+<h2 id="四、建图流程"><a href="#四、建图流程" class="headerlink" title="四、建图流程"></a>四、建图流程</h2><h3 id="1-启动-Gazebo"><a href="#1-启动-Gazebo" class="headerlink" title="1. 启动 Gazebo"></a>1. 启动 Gazebo</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">export</span> TURTLEBOT3_MODEL=burger<br>ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py<br></code></pre></td></tr></table></figure>
+
+<p>机器人提供：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs text">/scan<br>/odom<br>/cmd_vel<br></code></pre></td></tr></table></figure>
+
+<p>以及 TF。</p>
+<h3 id="2-SLAM-Toolbox-建图"><a href="#2-SLAM-Toolbox-建图" class="headerlink" title="2. SLAM Toolbox 建图"></a>2. SLAM Toolbox 建图</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">ros2 launch slam_toolbox online_async_launch.py use_sim_time:=<span class="hljs-literal">true</span><br></code></pre></td></tr></table></figure>
+
+<p>数据流：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs text">LiDAR<br>  ↓<br>/scan<br>  ↓<br>SLAM Toolbox<br>  ↓<br>/map<br></code></pre></td></tr></table></figure>
+
+<p>通过遥控机器人在 Gazebo 环境中运动，建立地图。</p>
+<h3 id="3-保存地图"><a href="#3-保存地图" class="headerlink" title="3. 保存地图"></a>3. 保存地图</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">mkdir</span> -p ~/turtlebot3_ws/maps<br><br>ros2 run nav2_map_server map_saver_cli   -f ~/turtlebot3_ws/maps/turtlebot3_room<br></code></pre></td></tr></table></figure>
+
+<p>生成：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs text">turtlebot3_room.pgm<br>turtlebot3_room.yaml<br></code></pre></td></tr></table></figure>
+
+<p>其中 <code>.pgm</code> 是地图图像，<code>.yaml</code> 保存地图元数据。</p>
+<h2 id="五、导航流程"><a href="#五、导航流程" class="headerlink" title="五、导航流程"></a>五、导航流程</h2><p>建图完成后，进入：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">已知地图 + AMCL + Nav2<br></code></pre></td></tr></table></figure>
+
+<p>数据关系：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs text">已保存地图<br>   ↓<br>Map Server<br>   ↓<br>AMCL<br>   ↓<br>机器人在 map 中的位置<br>   ↓<br>Nav2<br>   ↓<br>目标点<br>   ↓<br>路径规划<br>   ↓<br>速度控制<br></code></pre></td></tr></table></figure>
+
+<h2 id="六、Nav2-核心组件"><a href="#六、Nav2-核心组件" class="headerlink" title="六、Nav2 核心组件"></a>六、Nav2 核心组件</h2><p>项目涉及：</p>
+<ul>
+<li>AMCL</li>
+<li>Map Server</li>
+<li>Planner Server</li>
+<li>Controller Server</li>
+<li>BT Navigator</li>
+<li>Behavior Server</li>
+<li>Costmap</li>
+<li>Velocity Smoother</li>
+<li>Lifecycle Manager</li>
+</ul>
+<p>可以简化理解为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs text">AMCL<br>  ↓<br>机器人定位<br><br>Planner<br>  ↓<br>规划从当前位置到目标点的路径<br><br>Controller<br>  ↓<br>控制机器人跟踪路径<br><br>/cmd_vel<br>  ↓<br>TurtleBot3<br></code></pre></td></tr></table></figure>
+
+<h2 id="七、TF-坐标系"><a href="#七、TF-坐标系" class="headerlink" title="七、TF 坐标系"></a>七、TF 坐标系</h2><p>核心 TF 链：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs text">map<br> ↓<br>odom<br> ↓<br>base_footprint<br> ↓<br>base_link<br> ↓<br>base_scan<br></code></pre></td></tr></table></figure>
+
+<p>主要含义：</p>
+<ul>
+<li><code>map</code>：全局地图坐标系</li>
+<li><code>odom</code>：里程计坐标系</li>
+<li><code>base_footprint</code>：机器人地面基准坐标</li>
+<li><code>base_link</code>：机器人主体坐标系</li>
+<li><code>base_scan</code>：LiDAR 坐标系</li>
+</ul>
+<p>导航系统依赖 TF 在这些坐标系之间进行转换。</p>
+<h2 id="八、导航点"><a href="#八、导航点" class="headerlink" title="八、导航点"></a>八、导航点</h2><p>通过：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">ros2 run tf2_ros tf2_echo map base_footprint<br></code></pre></td></tr></table></figure>
+
+<p>记录实际目标位置。</p>
+<p>本项目最终记录：</p>
+<p>  点位          X        Y       Yaw</p>
+<hr>
+<p>  P1       -2.074   -0.418     18.0°<br>  P2       -1.770    0.741     83.4°<br>  P3        0.548    0.431    -87.0°<br>  P4        0.333   -1.778   -111.2°</p>
+<p>程序中使用 ROS 2 <code>PoseStamped</code> 的四元数表示姿态。</p>
+<h2 id="九、Python-多点导航"><a href="#九、Python-多点导航" class="headerlink" title="九、Python 多点导航"></a>九、Python 多点导航</h2><p>核心程序：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">scripts/multi_point_nav.py<br></code></pre></td></tr></table></figure>
+
+<p>使用：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs python">ActionClient(<br>    <span class="hljs-variable language_">self</span>,<br>    NavigateToPose,<br>    <span class="hljs-string">&#x27;/navigate_to_pose&#x27;</span><br>)<br></code></pre></td></tr></table></figure>
+
+<p>逻辑：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs text">发送 P1<br> ↓<br>等待结果<br> ↓<br>成功 → P2<br> ↓<br>等待结果<br> ↓<br>成功 → P3<br> ↓<br>等待结果<br> ↓<br>成功 → P4<br></code></pre></td></tr></table></figure>
+
+<p>最终完成：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">P1 → P2 → P3 → P4<br></code></pre></td></tr></table></figure>
+
+<p>这里没有直接手动控制 <code>/cmd_vel</code>，而是将”我要去哪里”交给 Nav2，由 Nav2<br>负责定位、规划和控制。</p>
+<h2 id="十、项目目录结构"><a href="#十、项目目录结构" class="headerlink" title="十、项目目录结构"></a>十、项目目录结构</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs text">turtlebot3_ws/<br>│<br>├── src/<br>│   ├── DynamixelSDK/<br>│   ├── turtlebot3/<br>│   ├── turtlebot3_msgs/<br>│   └── turtlebot3_simulations/<br>│<br>├── config/<br>│   └── burger_nav2.yaml<br>│<br>├── maps/<br>│   ├── turtlebot3_room.pgm<br>│   └── turtlebot3_room.yaml<br>│<br>├── scripts/<br>│   ├── multi_point_nav.py<br>│   ├── multi_point_nav_v1.py<br>│   ├── start_nav.sh<br>│   ├── start_nav_v1.sh<br>│   └── start_nav_v2_backup.sh<br>│<br>├── build/<br>├── install/<br>└── log/<br></code></pre></td></tr></table></figure>
+
+<p>核心文件说明：</p>
+<p>  文件&#x2F;目录                      作用</p>
+<hr>
+<p>  <code>src/</code>                         TurtleBot3 和相关 ROS 2 源码<br>  <code>config/burger_nav2.yaml</code>      Burger 的 Nav2 参数配置<br>  <code>maps/turtlebot3_room.pgm</code>     SLAM 保存的地图图像<br>  <code>maps/turtlebot3_room.yaml</code>    地图元数据<br>  <code>scripts/multi_point_nav.py</code>   P1→P2→P3→P4 多点导航<br>  <code>scripts/start_nav.sh</code>         自动启动整个项目<br>  <code>build/</code>                       colcon 编译中间文件<br>  <code>install/</code>                     编译后的 ROS 2 安装结果<br>  <code>log/</code>                         colcon 编译日志</p>
+<h2 id="十一、技术栈"><a href="#十一、技术栈" class="headerlink" title="十一、技术栈"></a>十一、技术栈</h2><h3 id="系统"><a href="#系统" class="headerlink" title="系统"></a>系统</h3><ul>
+<li>Ubuntu 22.04.5 LTS</li>
+</ul>
+<h3 id="ROS"><a href="#ROS" class="headerlink" title="ROS"></a>ROS</h3><ul>
+<li>ROS 2 Humble</li>
+</ul>
+<h3 id="仿真"><a href="#仿真" class="headerlink" title="仿真"></a>仿真</h3><ul>
+<li>Gazebo Classic 11.10.2</li>
+</ul>
+<h3 id="机器人"><a href="#机器人" class="headerlink" title="机器人"></a>机器人</h3><ul>
+<li>TurtleBot3 Burger</li>
+</ul>
+<h3 id="建图"><a href="#建图" class="headerlink" title="建图"></a>建图</h3><ul>
+<li>SLAM Toolbox</li>
+</ul>
+<h3 id="定位"><a href="#定位" class="headerlink" title="定位"></a>定位</h3><ul>
+<li>AMCL</li>
+</ul>
+<h3 id="导航"><a href="#导航" class="headerlink" title="导航"></a>导航</h3><ul>
+<li>Nav2</li>
+</ul>
+<h3 id="编程与配置"><a href="#编程与配置" class="headerlink" title="编程与配置"></a>编程与配置</h3><ul>
+<li>Python 3</li>
+<li>Bash</li>
+<li>YAML</li>
+</ul>
+<h3 id="ROS-2-核心通信"><a href="#ROS-2-核心通信" class="headerlink" title="ROS 2 核心通信"></a>ROS 2 核心通信</h3><ul>
+<li>Topic</li>
+<li>Service</li>
+<li>Action</li>
+<li>TF &#x2F; TF2</li>
+</ul>
+<h3 id="构建"><a href="#构建" class="headerlink" title="构建"></a>构建</h3><ul>
+<li>colcon</li>
+</ul>
+<h2 id="十二、项目中的重要知识"><a href="#十二、项目中的重要知识" class="headerlink" title="十二、项目中的重要知识"></a>十二、项目中的重要知识</h2><h3 id="1-Topic"><a href="#1-Topic" class="headerlink" title="1. Topic"></a>1. Topic</h3><p>项目中使用：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs text">/scan<br>/odom<br>/cmd_vel<br>/map<br>/initialpose<br>/amcl_pose<br></code></pre></td></tr></table></figure>
+
+<p>Topic 适合持续的数据流。</p>
+<p>例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">LiDAR → /scan<br></code></pre></td></tr></table></figure>
+
+<h3 id="2-Service"><a href="#2-Service" class="headerlink" title="2. Service"></a>2. Service</h3><p>Service 采用：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">请求 → 响应<br></code></pre></td></tr></table></figure>
+
+<p>项目中用于生命周期、参数等操作。</p>
+<h3 id="3-Action"><a href="#3-Action" class="headerlink" title="3. Action"></a>3. Action</h3><p>导航任务使用 Action：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">NavigateToPose<br></code></pre></td></tr></table></figure>
+
+<p>因为导航是持续执行的任务，需要：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs text">发送目标<br> ↓<br>执行<br> ↓<br>反馈<br> ↓<br>结果<br></code></pre></td></tr></table></figure>
+
+<h3 id="4-Lifecycle-Node"><a href="#4-Lifecycle-Node" class="headerlink" title="4. Lifecycle Node"></a>4. Lifecycle Node</h3><p>Nav2 大量使用 Lifecycle Node：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs text">unconfigured<br>inactive<br>active<br>finalized<br></code></pre></td></tr></table></figure>
+
+<p>理解生命周期，是理解 Nav2 启动和状态管理的重要基础。</p>
+<h3 id="5-use-sim-time"><a href="#5-use-sim-time" class="headerlink" title="5. use_sim_time"></a>5. use_sim_time</h3><p>Gazebo 使用 <code>/clock</code> 提供仿真时间。</p>
+<p>如果不同节点使用不同时间源，就可能产生 TF 时间错误，例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">Lookup would require extrapolation into the future<br></code></pre></td></tr></table></figure>
+
+<p>因此仿真导航必须重视时间同步。</p>
+<h3 id="6-Gazebo-与-ROS-2"><a href="#6-Gazebo-与-ROS-2" class="headerlink" title="6. Gazebo 与 ROS 2"></a>6. Gazebo 与 ROS 2</h3><p>Gazebo 负责：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs text">物理仿真<br>机器人模型<br>世界环境<br>传感器<br></code></pre></td></tr></table></figure>
+
+<p>ROS 2 负责：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs text">节点<br>Topic<br>TF<br>导航<br>控制<br></code></pre></td></tr></table></figure>
+
+<p>两者通过 <code>gazebo_ros</code> 连接。</p>
+<h3 id="7-Nav2-插件系统"><a href="#7-Nav2-插件系统" class="headerlink" title="7. Nav2 插件系统"></a>7. Nav2 插件系统</h3><p>Nav2 的 Planner、Controller、Behavior 等功能通过插件加载。</p>
+<p>本项目曾遇到插件名称不匹配问题，例如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">nav2_navfn_planner/NavfnPlanner<br></code></pre></td></tr></table></figure>
+
+<p>以及：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs text">nav2_behaviors/Spin<br>nav2_behaviors/BackUp<br>nav2_behaviors/DriveOnHeading<br>nav2_behaviors/Wait<br>nav2_behaviors/AssistedTeleop<br></code></pre></td></tr></table></figure>
+
+<p>这说明 ROS 2 &#x2F; Nav2<br>版本变化可能影响插件注册名称，排查插件问题时应以当前系统实际注册的<br>plugin description 为准。</p>
+<h2 id="十三、项目中的问题与排查"><a href="#十三、项目中的问题与排查" class="headerlink" title="十三、项目中的问题与排查"></a>十三、项目中的问题与排查</h2><h3 id="Gazebo-无法生成机器人"><a href="#Gazebo-无法生成机器人" class="headerlink" title="Gazebo 无法生成机器人"></a>Gazebo 无法生成机器人</h3><p>排查了 Gazebo ROS Factory 插件以及：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs text">libgazebo_ros_factory.so<br>/spawn_entity<br></code></pre></td></tr></table></figure>
+
+<p>最终确认 Gazebo ROS 插件正确加载后，可以正常生成 TurtleBot3。</p>
+<h3 id="Nav2-Planner-加载失败"><a href="#Nav2-Planner-加载失败" class="headerlink" title="Nav2 Planner 加载失败"></a>Nav2 Planner 加载失败</h3><p>原因是插件名称不匹配：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">nav2_navfn_planner::NavfnPlanner<br></code></pre></td></tr></table></figure>
+
+<p>修正为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">nav2_navfn_planner/NavfnPlanner<br></code></pre></td></tr></table></figure>
+
+<h3 id="Behavior-Server-插件加载失败"><a href="#Behavior-Server-插件加载失败" class="headerlink" title="Behavior Server 插件加载失败"></a>Behavior Server 插件加载失败</h3><p>同样修正插件名称格式：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs text">nav2_behaviors/Spin<br>nav2_behaviors/BackUp<br>...<br></code></pre></td></tr></table></figure>
+
+<h3 id="AMCL-时间问题"><a href="#AMCL-时间问题" class="headerlink" title="AMCL 时间问题"></a>AMCL 时间问题</h3><p>曾出现：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">Lookup would require extrapolation into the future<br></code></pre></td></tr></table></figure>
+
+<p>最终通过统一使用 Gazebo 仿真时间解决。</p>
+<h3 id="ROS-2-DDS-网络发现问题"><a href="#ROS-2-DDS-网络发现问题" class="headerlink" title="ROS 2 DDS 网络发现问题"></a>ROS 2 DDS 网络发现问题</h3><p>排查过程中发现本机存在 <code>FlClash</code> 网络接口，ROS 2<br>多播流量一度经过该接口，导致节点发现和服务通信出现异常。</p>
+<p>这个问题说明：</p>
+<blockquote>
+<p>ROS 2 节点”看不到彼此”时，不一定是节点没有启动，也可能是 DDS Discovery<br>的网络路径出现问题。</p>
+</blockquote>
+<h3 id="自动启动时序问题"><a href="#自动启动时序问题" class="headerlink" title="自动启动时序问题"></a>自动启动时序问题</h3><p><code>start_nav.sh</code> 曾出现启动后等待 AMCL 的情况，但重新运行后又成功完成整个<br>P1→P2→P3→P4 导航。</p>
+<p>因此目前将其视为：</p>
+<blockquote>
+<p>启动阶段可能存在偶发的 ROS 2<br>节点发现&#x2F;启动时序问题，后续可以继续优化启动脚本。</p>
+</blockquote>
+<h2 id="十四、项目的分层设计"><a href="#十四、项目的分层设计" class="headerlink" title="十四、项目的分层设计"></a>十四、项目的分层设计</h2><p>整个系统可以分为三层：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs text">任务层<br>│<br>├── P1 → P2 → P3 → P4<br>└── multi_point_nav.py<br>        │<br>        ▼<br>导航层<br>│<br>├── Nav2<br>├── Planner<br>├── Controller<br>├── AMCL<br>└── Costmap<br>        │<br>        ▼<br>仿真/机器人层<br>│<br>├── Gazebo<br>├── TurtleBot3<br>├── LiDAR<br>├── Odom<br>└── TF<br></code></pre></td></tr></table></figure>
+
+<p>上层解决：</p>
+<blockquote>
+<p>我要去哪里？</p>
+</blockquote>
+<p>中层解决：</p>
+<blockquote>
+<p>怎么规划、怎么走？</p>
+</blockquote>
+<p>底层解决：</p>
+<blockquote>
+<p>机器人如何运动、传感器数据从哪里来？</p>
+</blockquote>
+<p>这种分层也是移动机器人软件系统的重要设计思想。</p>
+<h2 id="十五、项目完成情况"><a href="#十五、项目完成情况" class="headerlink" title="十五、项目完成情况"></a>十五、项目完成情况</h2><ul>
+<li><input checked="" disabled="" type="checkbox"> Ubuntu 22.04</li>
+<li><input checked="" disabled="" type="checkbox"> ROS 2 Humble</li>
+<li><input checked="" disabled="" type="checkbox"> TurtleBot3 Burger</li>
+<li><input checked="" disabled="" type="checkbox"> Gazebo Classic</li>
+<li><input checked="" disabled="" type="checkbox"> LiDAR <code>/scan</code></li>
+<li><input checked="" disabled="" type="checkbox"> Odom <code>/odom</code></li>
+<li><input checked="" disabled="" type="checkbox"> TF</li>
+<li><input checked="" disabled="" type="checkbox"> SLAM Toolbox 建图</li>
+<li><input checked="" disabled="" type="checkbox"> 地图保存</li>
+<li><input checked="" disabled="" type="checkbox"> Map Server</li>
+<li><input checked="" disabled="" type="checkbox"> AMCL 定位</li>
+<li><input checked="" disabled="" type="checkbox"> Nav2</li>
+<li><input checked="" disabled="" type="checkbox"> Planner</li>
+<li><input checked="" disabled="" type="checkbox"> Controller</li>
+<li><input checked="" disabled="" type="checkbox"> Python Action Client</li>
+<li><input checked="" disabled="" type="checkbox"> P1 → P2 → P3 → P4 多点导航</li>
+<li><input checked="" disabled="" type="checkbox"> 自动化启动脚本</li>
+</ul>
+<h2 id="十六、后续扩展方向"><a href="#十六、后续扩展方向" class="headerlink" title="十六、后续扩展方向"></a>十六、后续扩展方向</h2><h3 id="1-完善一键启动"><a href="#1-完善一键启动" class="headerlink" title="1. 完善一键启动"></a>1. 完善一键启动</h3><p>进一步解决偶发启动时序问题，实现稳定的一键启动。</p>
+<h3 id="2-RViz-自动配置"><a href="#2-RViz-自动配置" class="headerlink" title="2. RViz 自动配置"></a>2. RViz 自动配置</h3><p>保存：</p>
+<ul>
+<li>Map</li>
+<li>LaserScan</li>
+<li>TF</li>
+<li>RobotModel</li>
+<li>Global Costmap</li>
+<li>Local Costmap</li>
+<li>Robot Pose</li>
+</ul>
+<p>等可视化配置。</p>
+<h3 id="3-动态目标点"><a href="#3-动态目标点" class="headerlink" title="3. 动态目标点"></a>3. 动态目标点</h3><p>将导航点从 Python 源码中抽离到 YAML：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">points:</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">P1</span><br>    <span class="hljs-attr">x:</span> <span class="hljs-number">-2.074</span><br>    <span class="hljs-attr">y:</span> <span class="hljs-number">-0.418</span><br>  <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">P2</span><br>    <span class="hljs-attr">x:</span> <span class="hljs-number">-1.770</span><br>    <span class="hljs-attr">y:</span> <span class="hljs-number">0.741</span><br></code></pre></td></tr></table></figure>
+
+<p>这样可以更方便地修改路线。</p>
+<h3 id="4-任务调度"><a href="#4-任务调度" class="headerlink" title="4. 任务调度"></a>4. 任务调度</h3><p>从单纯导航升级为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs text">到达 P1<br> ↓<br>等待<br> ↓<br>执行任务<br> ↓<br>前往 P2<br> ↓<br>执行任务<br> ↓<br>前往 P3<br></code></pre></td></tr></table></figure>
+
+<h3 id="5-避障"><a href="#5-避障" class="headerlink" title="5. 避障"></a>5. 避障</h3><p>后续可以研究：</p>
+<ul>
+<li>Global Costmap</li>
+<li>Local Costmap</li>
+<li>Obstacle Layer</li>
+<li>Inflation Layer</li>
+<li>Controller</li>
+</ul>
+<p>实现动态障碍物环境下的导航。</p>
+<h2 id="十七、总结"><a href="#十七、总结" class="headerlink" title="十七、总结"></a>十七、总结</h2><p>这个项目表面上是一个 TurtleBot3 Gazebo 多点导航<br>Demo，但完整实现后实际上串联了移动机器人导航中的多个核心知识：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs text">ROS 2<br> ↓<br>Node<br> ↓<br>Topic / Service / Action<br> ↓<br>TF / TF2<br> ↓<br>Gazebo<br> ↓<br>传感器<br> ↓<br>SLAM<br> ↓<br>地图<br> ↓<br>AMCL<br> ↓<br>Nav2<br> ↓<br>Planner<br> ↓<br>Controller<br> ↓<br>Action Client<br> ↓<br>多点导航<br> ↓<br>Shell 自动化<br></code></pre></td></tr></table></figure>
+
+<p>最终实现了从仿真、建图、地图保存、定位、路径规划，到多点任务执行的一整套流程。</p>
+<p>这个项目也为后续加入避障、动态目标点、任务调度、视觉、语音以及真实机器人部署提供了基础。</p>
+<hr>
+<h2 id="项目关键词"><a href="#项目关键词" class="headerlink" title="项目关键词"></a>项目关键词</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs text">ROS 2<br>ROS 2 Humble<br>Ubuntu 22.04<br>TurtleBot3<br>Burger<br>Gazebo Classic<br>SLAM Toolbox<br>AMCL<br>Nav2<br>TF2<br>LiDAR<br>多点导航<br>NavigateToPose<br>Python<br>Bash<br>机器人导航<br>移动机器人<br></code></pre></td></tr></table></figure>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E6%8A%80%E6%9C%AF/" class="category-chain-item">技术</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/ROS-2/" class="print-no-link">#ROS 2</a>
+      
+        <a href="/tags/TurtleBot3/" class="print-no-link">#TurtleBot3</a>
+      
+        <a href="/tags/Nav2/" class="print-no-link">#Nav2</a>
+      
+        <a href="/tags/Gazebo/" class="print-no-link">#Gazebo</a>
+      
+        <a href="/tags/SLAM/" class="print-no-link">#SLAM</a>
+      
+        <a href="/tags/AMCL/" class="print-no-link">#AMCL</a>
+      
+        <a href="/tags/%E6%9C%BA%E5%99%A8%E4%BA%BA%E5%AF%BC%E8%88%AA/" class="print-no-link">#机器人导航</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>TurtleBot3 多点定点导航项目</div>
+      <div>https://ajxing123.github.io/2026/10/03/2026-10-03-turtlebot3/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>AJXING</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年10月3日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/09/12/2026-09-12-linux1/" title="Linux 文件系统与基础命令学习手册">
+                        <span class="hidden-mobile">Linux 文件系统与基础命令学习手册</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
