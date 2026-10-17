@@ -19,15 +19,15 @@
   <meta name="author" content="AJXING">
   <meta name="keywords" content="技术,博客,编程">
   
-    <meta name="description" content="基于 Ubuntu 22.04 + ROS 2 Humble + Gazebo Classic 搭建 TurtleBot3 Burger 仿真导航系统，完整记录从 SLAM 建图、AMCL 定位、Nav2 路径规划到 Python Action Client 多点定点导航（P1→P2→P3→P4）的实现与踩坑排查全过程。">
+    <meta name="description" content="基于 Ubuntu 22.04 + ROS 2 Humble + Gazebo Classic 搭建 TurtleBot3 Burger 仿真导航系统，完整记录从 SLAM 建图、AMCL 定位、Nav2 路径规划到 Python Action Client 多点定点导航（P1→P2→P3→P4），以及后续加入运行时障碍物实现动态避障的踩坑排查全过程。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="TurtleBot3 多点定点导航项目">
 <meta property="og:url" content="https://ajxing123.github.io/2026/10/03/2026-10-03-turtlebot3/index.html">
 <meta property="og:site_name" content="每天戒烟8小时">
-<meta property="og:description" content="基于 Ubuntu 22.04 + ROS 2 Humble + Gazebo Classic 搭建 TurtleBot3 Burger 仿真导航系统，完整记录从 SLAM 建图、AMCL 定位、Nav2 路径规划到 Python Action Client 多点定点导航（P1→P2→P3→P4）的实现与踩坑排查全过程。">
+<meta property="og:description" content="基于 Ubuntu 22.04 + ROS 2 Humble + Gazebo Classic 搭建 TurtleBot3 Burger 仿真导航系统，完整记录从 SLAM 建图、AMCL 定位、Nav2 路径规划到 Python Action Client 多点定点导航（P1→P2→P3→P4），以及后续加入运行时障碍物实现动态避障的踩坑排查全过程。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2026-10-03T02:00:00.000Z">
-<meta property="article:modified_time" content="2026-10-17T01:32:56.325Z">
+<meta property="article:modified_time" content="2026-10-17T09:12:02.848Z">
 <meta property="article:author" content="AJXING">
 <meta property="article:tag" content="AMCL">
 <meta property="article:tag" content="Gazebo">
@@ -332,7 +332,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          6k 字
+          7.7k 字
         
       </span>
     
@@ -343,7 +343,7 @@
         
         
         
-          50 分钟
+          65 分钟
         
       </span>
     
@@ -387,7 +387,7 @@
               <p id="updated-time" class="note note-info" style="">
                 
                   
-                    本文最后更新于 2026年10月17日 上午
+                    本文最后更新于 2026年10月17日 下午
                   
                 
               </p>
@@ -414,7 +414,7 @@
 
 <p>机器人能够在 Gazebo 中依次前往四个预先记录的目标点。</p>
 <blockquote>
-<p>当前项目重点是多点定点导航，不以复杂动态避障为目标。</p>
+<p>2026-10 更新：本文最初以多点定点导航为目标，后续已加入运行时障碍物并实现动态避障绕行，完整过程见文末「十八、动态避障实战」。</p>
 </blockquote>
 <h2 id="二、项目最终效果"><a href="#二、项目最终效果" class="headerlink" title="二、项目最终效果"></a>二、项目最终效果</h2><p>完整工作流：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs text">start_nav.sh<br>    ↓<br>Gazebo<br>    ↓<br>TurtleBot3 Burger<br>    ↓<br>Nav2<br>    ↓<br>AMCL 初始化<br>    ↓<br>加载已保存地图<br>    ↓<br>multi_point_nav.py<br>    ↓<br>P1 → P2 → P3 → P4<br></code></pre></td></tr></table></figure>
@@ -638,6 +638,8 @@
 <li><input checked="" disabled="" type="checkbox"> Python Action Client</li>
 <li><input checked="" disabled="" type="checkbox"> P1 → P2 → P3 → P4 多点导航</li>
 <li><input checked="" disabled="" type="checkbox"> 自动化启动脚本</li>
+<li><input checked="" disabled="" type="checkbox"> 运行时障碍物感知（obstacle_layer 实时标记）</li>
+<li><input checked="" disabled="" type="checkbox"> 动态避障绕行（P1 → P2 穿越障碍区验证通过）</li>
 </ul>
 <h2 id="十六、后续扩展方向"><a href="#十六、后续扩展方向" class="headerlink" title="十六、后续扩展方向"></a>十六、后续扩展方向</h2><h3 id="1-完善一键启动"><a href="#1-完善一键启动" class="headerlink" title="1. 完善一键启动"></a>1. 完善一键启动</h3><p>进一步解决偶发启动时序问题，实现稳定的一键启动。</p>
 <h3 id="2-RViz-自动配置"><a href="#2-RViz-自动配置" class="headerlink" title="2. RViz 自动配置"></a>2. RViz 自动配置</h3><p>保存：</p>
@@ -658,22 +660,61 @@
 <h3 id="4-任务调度"><a href="#4-任务调度" class="headerlink" title="4. 任务调度"></a>4. 任务调度</h3><p>从单纯导航升级为：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs text">到达 P1<br> ↓<br>等待<br> ↓<br>执行任务<br> ↓<br>前往 P2<br> ↓<br>执行任务<br> ↓<br>前往 P3<br></code></pre></td></tr></table></figure>
 
-<h3 id="5-避障"><a href="#5-避障" class="headerlink" title="5. 避障"></a>5. 避障</h3><p>后续可以研究：</p>
-<ul>
-<li>Global Costmap</li>
-<li>Local Costmap</li>
-<li>Obstacle Layer</li>
-<li>Inflation Layer</li>
-<li>Controller</li>
-</ul>
-<p>实现动态障碍物环境下的导航。</p>
+<h3 id="5-避障（已完成）"><a href="#5-避障（已完成）" class="headerlink" title="5. 避障（已完成）"></a>5. 避障（已完成）</h3><p>动态避障已于 2026 年 10 月完成并在仿真中验证通过，完整过程见文末「十八、动态避障实战」。</p>
 <h2 id="十七、总结"><a href="#十七、总结" class="headerlink" title="十七、总结"></a>十七、总结</h2><p>这个项目表面上是一个 TurtleBot3 Gazebo 多点导航<br>Demo，但完整实现后实际上串联了移动机器人导航中的多个核心知识：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs text">ROS 2<br> ↓<br>Node<br> ↓<br>Topic / Service / Action<br> ↓<br>TF / TF2<br> ↓<br>Gazebo<br> ↓<br>传感器<br> ↓<br>SLAM<br> ↓<br>地图<br> ↓<br>AMCL<br> ↓<br>Nav2<br> ↓<br>Planner<br> ↓<br>Controller<br> ↓<br>Action Client<br> ↓<br>多点导航<br> ↓<br>Shell 自动化<br></code></pre></td></tr></table></figure>
 
 <p>最终实现了从仿真、建图、地图保存、定位、路径规划，到多点任务执行的一整套流程。</p>
-<p>这个项目也为后续加入避障、动态目标点、任务调度、视觉、语音以及真实机器人部署提供了基础。</p>
+<p>这个项目也为后续动态目标点、任务调度、视觉、语音以及真实机器人部署提供了基础。</p>
+<h2 id="十八、动态避障实战（2026-10-更新）"><a href="#十八、动态避障实战（2026-10-更新）" class="headerlink" title="十八、动态避障实战（2026-10 更新）"></a>十八、动态避障实战（2026-10 更新）</h2><p>项目最初版本只跑通了静态地图下的多点导航。本节记录后续加入运行时障碍物、实现动态避障的完整过程。</p>
+<h3 id="1-障碍世界"><a href="#1-障碍世界" class="headerlink" title="1. 障碍世界"></a>1. 障碍世界</h3><p>使用自定义世界 <code>turtlebot3_world_obstacle.world</code>，在 P1 → P2 必经路线上放置一个障碍物：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs text">obstacle_box<br>位置：(-1.92, 0.15)<br>尺寸：0.8m(x) × 0.3m(y) × 0.5m(z)<br></code></pre></td></tr></table></figure>
+
+<p>关键设计：<strong>障碍物不存在于静态地图中</strong>——SLAM 建图时没有它，运行时只能靠激光雷达实时感知，以此验证系统的动态避障能力。</p>
+<p>机器人起点 (-2.0, -0.5)，P1(-2.07, -0.42) → P2(-1.77, 0.74) 的直线连线恰好穿过箱子，机器人必须绕行（从箱子右侧 x &gt; -1.52 通过）。</p>
+<h3 id="2-问题现象"><a href="#2-问题现象" class="headerlink" title="2. 问题现象"></a>2. 问题现象</h3><p>加入障碍物后出现三类典型症状：</p>
+<ul>
+<li>机器人在障碍前<strong>徘徊振荡</strong>，无法决策</li>
+<li>RViz 中全局路径已经绕行，但机器人<strong>不跟随</strong></li>
+<li>频繁触发恢复行为（清图、自旋、后退），陷入循环</li>
+</ul>
+<h3 id="3-排查与根因"><a href="#3-排查与根因" class="headerlink" title="3. 排查与根因"></a>3. 排查与根因</h3><p>逐项排查后定位到几个问题：</p>
+<p>  问题                                       影响</p>
 <hr>
-<h2 id="项目关键词"><a href="#项目关键词" class="headerlink" title="项目关键词"></a>项目关键词</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs text">ROS 2<br>ROS 2 Humble<br>Ubuntu 22.04<br>TurtleBot3<br>Burger<br>Gazebo Classic<br>SLAM Toolbox<br>AMCL<br>Nav2<br>TF2<br>LiDAR<br>多点导航<br>NavigateToPose<br>Python<br>Bash<br>机器人导航<br>移动机器人<br></code></pre></td></tr></table></figure>
+<p>  障碍代价权重过低                           轨迹评分中”贴障”惩罚被”跟路径”奖励淹没<br>  膨胀半径过大（0.5m）                       可通行通道被膨胀区彻底堵死<br>  允许倒退（min_vel_x &lt; 0）                  引入前后摇摆振荡<br>  obstacle_layer 与 voxel_layer 共用同一 &#x2F;scan   同一束激光被重复标记，清除状态不一致</p>
+<blockquote>
+<p>教训：避障异常时，不要只盯控制器参数，先检查 costmap 各层是否重复标记、膨胀区是否堵死了通道。</p>
+</blockquote>
+<h3 id="4-最终方案"><a href="#4-最终方案" class="headerlink" title="4. 最终方案"></a>4. 最终方案</h3><p>经过多轮迭代，最终稳定配置（<code>config/burger_nav2.yaml</code>）如下。</p>
+<p><strong>Costmap 分层膨胀</strong></p>
+<p>  参数                  全局     局部     理由</p>
+<hr>
+<p>  inflation_radius      0.30     0.15     全局让规划路径离箱 ≥0.30m；局部 0.15 &#x3D; 机器人半径 0.1 + 0.05 余量，避免机器人自己被膨胀区困住<br>  cost_scaling_factor   5.0      5.0      代价梯度更陡，靠近障碍时代价快速上升<br>  plugins               static + obstacle + inflation   obstacle + inflation   移除 voxel_layer，消除同一 scan 的重复标记</p>
+<p><strong>控制器：RegulatedPurePursuit</strong></p>
+<p>由 DWB 切换为 Regulated Pure Pursuit，关键参数：</p>
+<p>  参数                       值          说明</p>
+<hr>
+<p>  desired_linear_velocity    0.25       巡航速度（m&#x2F;s）<br>  max_angular_velocity       1.0        保证足够的转向能力绕障<br>  allow_reversing            false      禁止倒退，消除前后摇摆<br>  max&#x2F;min_lookahead_dist     0.6 &#x2F; 0.3  前瞻距离适配 5m 级房间尺度</p>
+<p><strong>规划与恢复</strong></p>
+<ul>
+<li>NavFn <code>tolerance: 0.5</code>：终点附近若存在运行时障碍标记（激光噪声、AMCL 漂移），允许在 0.5m 半径内搜索替代自由终点，避免 create_plan 直接失败</li>
+<li>progress_checker：15 秒内必须移动至少 0.3m，只有真实停滞才触发恢复</li>
+<li><code>multi_point_nav.py</code> 增加失败自动重试：<strong>重试前先清空 costmap</strong>，清除陈旧障碍标记后再重新发送目标点</li>
+</ul>
+<h3 id="5-验证结果"><a href="#5-验证结果" class="headerlink" title="5. 验证结果"></a>5. 验证结果</h3><p>  点位               结果   说明</p>
+<hr>
+<p>  P1 (-2.07, -0.42)  ✅     正常到达<br>  P2 (-1.77, 0.74)   ✅     成功识别箱子并从右侧绕行通过<br>  P3 (0.55, 0.43)    ❌     NavFn 规划失败：终点紧贴墙壁膨胀区，需调整点位或放宽 goal 容差</p>
+<p>避障核心目标——识别运行时障碍并绕行——已在 P1 → P2 路段验证通过；P3 失败属于点位选址问题，与避障能力本身无关，留待后续修正。</p>
+<h3 id="6-经验总结"><a href="#6-经验总结" class="headerlink" title="6. 经验总结"></a>6. 经验总结</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs text">避障排查顺序建议：<br>costmap 层配置 → 膨胀参数 → 控制器类型/参数 → 恢复行为链<br></code></pre></td></tr></table></figure>
+
+<ol>
+<li>先确认障碍是否被正确标记（RViz 查看 costmap，或 <code>ros2 topic echo</code> 对应话题）</li>
+<li>膨胀半径不是越大越安全——过大会堵死通道、困住机器人</li>
+<li>差速小车在狭窄房间场景，Pure Pursuit 类控制器往往比 DWB 更容易调稳定</li>
+<li>允许倒退（负 min_vel_x）是振荡的常见根源</li>
+</ol>
+<hr>
+<h2 id="项目关键词"><a href="#项目关键词" class="headerlink" title="项目关键词"></a>项目关键词</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs text">ROS 2<br>ROS 2 Humble<br>Ubuntu 22.04<br>TurtleBot3<br>Burger<br>Gazebo Classic<br>SLAM Toolbox<br>AMCL<br>Nav2<br>TF2<br>LiDAR<br>多点导航<br>动态避障<br>RegulatedPurePursuit<br>Costmap<br>NavigateToPose<br>Python<br>Bash<br>机器人导航<br>移动机器人<br></code></pre></td></tr></table></figure>
 
                 
               </div>
