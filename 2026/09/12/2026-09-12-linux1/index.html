@@ -27,7 +27,7 @@
 <meta property="og:description" content="系统掌握Linux文件系统树形结构与路径规则，目录浏览、文件增删改移、内容查看全命令精讲，附分步实操练习与ROS工作空间综合实战项目，适合开发新人收藏。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2026-09-12T02:00:00.000Z">
-<meta property="article:modified_time" content="2026-09-17T02:55:07.263Z">
+<meta property="article:modified_time" content="2026-10-17T01:33:02.149Z">
 <meta property="article:author" content="AJXING">
 <meta property="article:tag" content="Linux">
 <meta property="article:tag" content="ROS">
@@ -384,7 +384,7 @@
               <p id="updated-time" class="note note-info" style="">
                 
                   
-                    本文最后更新于 2026年9月17日 上午
+                    本文最后更新于 2026年10月17日 上午
                   
                 
               </p>
@@ -392,7 +392,7 @@
             
               <div class="markdown-body">
                 
-                <h1 id="Linux-文件系统与基础命令学习手册"><a href="#Linux-文件系统与基础命令学习手册" class="headerlink" title="Linux 文件系统与基础命令学习手册"></a>Linux 文件系统与基础命令学习手册</h1><h2 id="学习目标"><a href="#学习目标" class="headerlink" title="学习目标"></a>学习目标</h2><p>掌握Linux文件系统树形结构与路径规则，熟练使用目录浏览、文件增删改移、内容查看类基础命令，能够独立完成日常文件操作与简单目录运维。</p>
+                <h2 id="学习目标"><a href="#学习目标" class="headerlink" title="学习目标"></a>学习目标</h2><p>掌握Linux文件系统树形结构与路径规则，熟练使用目录浏览、文件增删改移、内容查看类基础命令，能够独立完成日常文件操作与简单目录运维。</p>
 <h2 id="一、核心知识体系"><a href="#一、核心知识体系" class="headerlink" title="一、核心知识体系"></a>一、核心知识体系</h2><h3 id="1-1-文件系统结构"><a href="#1-1-文件系统结构" class="headerlink" title="1.1 文件系统结构"></a>1.1 文件系统结构</h3><p>Linux采用单根树形目录结构，所有文件从根目录 <code>/</code> 开始，没有Windows的C&#x2F;D盘符概念。</p>
 <table>
 <thead>
@@ -595,7 +595,8 @@
 <li>使用<code>tail -f</code>实时跟踪日志新增内容，使用<code>Ctrl+C</code>结束监听。</li>
 </ol>
 <h2 id="三、综合实战项目：模拟ROS工作空间搭建"><a href="#三、综合实战项目：模拟ROS工作空间搭建" class="headerlink" title="三、综合实战项目：模拟ROS工作空间搭建"></a>三、综合实战项目：模拟ROS工作空间搭建</h2><h3 id="项目目标"><a href="#项目目标" class="headerlink" title="项目目标"></a>项目目标</h3><p>模拟ROS2开发场景，完成工作空间目录搭建、文件布置、备份、整理、日志监控全流程，覆盖前面全部基础命令。</p>
-<h3 id="最终目录结构"><a href="#最终目录结构" class="headerlink" title="最终目录结构"></a>最终目录结构</h3><p>~&#x2F;ros2_ws&#x2F;<br>├── src&#x2F;<br>│   ├── robot_chassis&#x2F;<br>│   ├── robot_vision&#x2F;<br>│   └── robot_control&#x2F;<br>├── logs&#x2F;<br>├── config&#x2F;<br>└── backup&#x2F;</p>
+<h3 id="最终目录结构"><a href="#最终目录结构" class="headerlink" title="最终目录结构"></a>最终目录结构</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs text">~/ros2_ws/<br>├── src/<br>│   ├── robot_chassis/<br>│   ├── robot_vision/<br>│   └── robot_control/<br>├── logs/<br>├── config/<br>└── backup/<br></code></pre></td></tr></table></figure>
+
 <h3 id="操作步骤"><a href="#操作步骤" class="headerlink" title="操作步骤"></a>操作步骤</h3><h4 id="步骤1：创建目录结构"><a href="#步骤1：创建目录结构" class="headerlink" title="步骤1：创建目录结构"></a>步骤1：创建目录结构</h4><p>回到家目录，使用<code>mkdir -p</code>一次性创建ros2工作空间完整目录树，创建完成后使用<code>ls -R</code>查看完整目录，核对文件夹结构是否和预期一致。</p>
 <h4 id="步骤2：创建初始文件"><a href="#步骤2：创建初始文件" class="headerlink" title="步骤2：创建初始文件"></a>步骤2：创建初始文件</h4><p>进入ros2_ws的src源码目录，分别为robot_base、robot_vision、robot_control三个功能包创建<code>package.xml</code>和<code>CMakeLists.txt</code>配置文件。<br>然后在config文件夹创建参数配置文件params.yaml，logs文件夹创建runtime.log日志文件。</p>
 <h4 id="步骤3：写入测试数据"><a href="#步骤3：写入测试数据" class="headerlink" title="步骤3：写入测试数据"></a>步骤3：写入测试数据</h4><p>编辑params.yaml配置文件，写入机器人名称、最大速度等配置参数。<br>生成模拟节点运行日志，用来测试日志查看命令。</p>
