@@ -103,4 +103,8 @@ theme: fluid
 ## Docs: https://hexo.io/docs/one-command-deployment
 ## 使用 GitHub Actions 部署时无需此处配置，保留为空即可
 deploy:
-  type: ''
+  type: git
+  repo: git@github.com:AJXING123/AJXING123.github.io.git
+  branch: main
+  message: "Site updated: {{ now('YYYY-MM-DD HH:mm:ss') }}"
+
