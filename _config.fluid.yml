@@ -5,10 +5,10 @@
 #---------------------------
 
 # 浏览器标签图标，可替换为自己的图片放到 source/img/ 下
-favicon: /img/favicon.png
+favicon: /img/favicon.svg
 
 navbar:
-  blog_title: "我的技术博客"
+  blog_title: "AJXING 的技术博客"
   menu:
     - { key: "home", link: "/", icon: "iconfont icon-home-fill" }
     - { key: "archive", link: "/archives/", icon: "iconfont icon-archive-fill" }
@@ -51,6 +51,17 @@ code:
     highlightjs:
       style: "github gist"
       style_dark: "dark"
+
+about:
+  enable: true
+  banner_img: /img/default.png
+  banner_img_height: 60
+  banner_mask_alpha: 0.3
+  avatar: /img/avatar.png
+  name: "AJXING"
+  intro: "机器人开发学习者 · ROS 2 / 具身智能 / 模仿学习"
+  icons:
+    - { class: "iconfont icon-github-fill", link: "https://github.com/AJXING123", tip: "GitHub" }
 
 footer:
   content: '

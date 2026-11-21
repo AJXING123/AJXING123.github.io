@@ -3,7 +3,7 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: 每天戒烟8小时
+title: AJXING 的技术博客
 subtitle: '记录与分享'
 description: '个人技术博客，记录学习与实践'
 keywords: 技术,博客,编程
@@ -32,7 +32,7 @@ i18n_dir: :lang
 skip_render:
 
 # Writing
-new_post_name: :title.md # File name of new posts
+new_post_name: :year-:month-:day-:title.md # File name of new posts
 default_layout: post
 titlecase: false # Transform title into titlecase
 external_link:
@@ -106,5 +106,5 @@ deploy:
   type: git
   repo: git@github.com:AJXING123/AJXING123.github.io.git
   branch: main
-  message: "Site updated: {{ now('YYYY-MM-DD HH:mm:ss') }}"
+  message: "Site updated: {{ now('yyyy-MM-dd HH:mm:ss') }}"
 

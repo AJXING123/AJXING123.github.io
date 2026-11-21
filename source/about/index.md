@@ -5,11 +5,13 @@ layout: about
 
 ## 关于我
 
-在这里介绍一下你自己：技术栈、兴趣方向、联系方式等。
+机器人开发学习者，关注 ROS 2、具身智能与机器人操作，正在系统学习模仿学习与移动操作。
 
 - GitHub: [https://github.com/AJXING123](https://github.com/AJXING123)
 - 邮箱: 185859864@qq.com
 
 ## 关于本站
 
-本站基于 [Hexo](https://hexo.io) + [Fluid](https://github.com/fluid-dev/hexo-theme-fluid) 主题搭建，通过 GitHub Actions 自动部署到 GitHub Pages。
+这里记录机器人开发、ROS 2、具身智能相关的学习笔记与项目实践。
+
+本站基于 [Hexo](https://hexo.io) + [Fluid](https://github.com/fluid-dev/hexo-theme-fluid) 主题搭建，源码与构建产物通过 GitHub 管理并发布到 GitHub Pages。
