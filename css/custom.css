@@ -1,0 +1,46 @@
+/* 关于页：与首页内容卡片风格保持一致 */
+
+/* 隐藏悬浮头像，避免打破首页统一的卡片顶部结构 */
+#board .about-avatar {
+  display: none;
+}
+
+/* 个人信息改为左对齐，作为卡片内的标题区 */
+#board .about-info {
+  text-align: left;
+  padding-bottom: 1.25rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--line-color);
+}
+
+#board .about-name {
+  font-size: 1.5rem;
+  font-weight: bold;
+  line-height: 1.4;
+  margin-bottom: 0.35rem;
+}
+
+#board .about-intro {
+  color: var(--sec-text-color);
+  font-size: 0.95rem;
+  margin-bottom: 0.75rem;
+}
+
+#board .about-icons > a > i {
+  font-size: 1.25rem;
+  color: var(--sec-text-color);
+  transition: color 0.2s ease-in-out;
+}
+
+#board .about-icons > a:hover > i {
+  color: var(--link-hover-color);
+}
+
+/* 正文紧跟标题区，去掉默认的大上边距 */
+#board .about-content {
+  margin-top: 0 !important;
+}
+
+#board .about-content .markdown-body > h2:first-child {
+  margin-top: 0;
+}
