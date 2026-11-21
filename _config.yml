@@ -104,7 +104,7 @@ theme: fluid
 ## 使用 GitHub Actions 部署时无需此处配置，保留为空即可
 deploy:
   type: git
-  repo: git@github.com:AJXING123/AJXING123.github.io.git
+  repo: https://github.com/AJXING123/AJXING123.github.io.git
   branch: main
   message: "Site updated: {{ now('yyyy-MM-dd HH:mm:ss') }}"
 
