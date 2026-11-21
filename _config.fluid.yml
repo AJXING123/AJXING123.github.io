@@ -7,6 +7,9 @@
 # 浏览器标签图标，可替换为自己的图片放到 source/img/ 下
 favicon: /img/favicon.svg
 
+# 自定义样式
+custom_css: /css/custom.css
+
 navbar:
   blog_title: "AJXING 的技术博客"
   menu:
@@ -55,7 +58,7 @@ code:
 about:
   enable: true
   banner_img: /img/default.png
-  banner_img_height: 60
+  banner_img_height: 80
   banner_mask_alpha: 0.3
   avatar: /img/avatar.png
   name: "AJXING"
